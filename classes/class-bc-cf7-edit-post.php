@@ -267,6 +267,7 @@ if(!class_exists('BC_CF7_Edit_Post')){
                 $submission->set_response(__('Item updated.'));
             }
             $submission->set_status('wpcf7_mail_sent');
+            do_action('bc_cf7_edit_post', $post_id);
         }
 
     	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
