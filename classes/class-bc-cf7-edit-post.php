@@ -220,7 +220,7 @@ if(!class_exists('BC_CF7_Edit_Post')){
             add_filter('do_shortcode_tag', [$this, 'do_shortcode_tag'], 10, 4);
             add_filter('shortcode_atts_wpcf7', [$this, 'shortcode_atts_wpcf7'], 10, 3);
             add_action('wpcf7_before_send_mail', [$this, 'wpcf7_before_send_mail'], 10, 3);
-            add_filter('wpcf7_feedback_response', [$this, 'wpcf7_feedback_response'], 10, 2);
+            add_filter('wpcf7_feedback_response', [$this, 'wpcf7_feedback_response'], 15, 2);
             add_filter('wpcf7_form_hidden_fields', [$this, 'wpcf7_form_hidden_fields'], 15);
             if(!has_filter('wpcf7_verify_nonce', 'is_user_logged_in')){
                 add_filter('wpcf7_verify_nonce', 'is_user_logged_in');
@@ -272,20 +272,12 @@ if(!class_exists('BC_CF7_Edit_Post')){
     	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         public function wpcf7_feedback_response($response, $result){
-            if(0 !== $this->post_id){
-                $uniqid = get_post_meta($post_id, 'bc_uniqid', true);
-                if('' !== $uniqid){
-                    switch($response['status']){
-            			case 'init':
-            			case 'validation_failed':
-            			case 'acceptance_missing':
-            			case 'spam':
-            				$response['bc_uniqid'] = '';
-            				break;
-            			default:
-            				$response['bc_uniqid'] = $uniqid;
-            				break;
-            		}
+            if(isset($response['bc_uniqid']) and '' !== $response['bc_uniqid']){
+                if(0 !== $this->post_id){
+                    $uniqid = get_post_meta($post_id, 'bc_uniqid', true);
+                    if('' !== $uniqid){
+                        $response['bc_uniqid'] = $uniqid;
+                    }
                 }
             }
             return $response;
@@ -304,9 +296,11 @@ if(!class_exists('BC_CF7_Edit_Post')){
             }
             $hidden_fields['bc_post_id'] = $post_id;
             $hidden_fields['bc_nonce'] = wp_create_nonce('bc-edit-post_' . $post_id);
-            $uniqid = get_post_meta($post_id, 'bc_uniqid', true);
-            if('' !== $uniqid){
-                $hidden_fields['bc_uniqid'] = $uniqid;
+            if(isset($hidden_fields['bc_uniqid'])){
+                $uniqid = get_post_meta($post_id, 'bc_uniqid', true);
+                if('' !== $uniqid){
+                    $hidden_fields['bc_uniqid'] = $uniqid;
+                }
             }
             return $hidden_fields;
         }
