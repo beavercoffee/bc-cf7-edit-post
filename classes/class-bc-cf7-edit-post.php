@@ -274,7 +274,7 @@ if(!class_exists('BC_CF7_Edit_Post')){
         public function wpcf7_feedback_response($response, $result){
             if(isset($response['bc_uniqid']) and '' !== $response['bc_uniqid']){
                 if(0 !== $this->post_id){
-                    $uniqid = get_post_meta($post_id, 'bc_uniqid', true);
+                    $uniqid = get_post_meta($this->post_id, 'bc_uniqid', true);
                     if('' !== $uniqid){
                         $response['bc_uniqid'] = $uniqid;
                     }
