@@ -9,7 +9,7 @@ if(!class_exists('BC_CF7_Edit_Post')){
     	//
     	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        private static $instance = null, $post_id = 0;
+        private static $instance = null;
 
     	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     	//
@@ -37,7 +37,7 @@ if(!class_exists('BC_CF7_Edit_Post')){
     	//
     	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        private $file = '', $response_message = '';
+        private $file = '', $post_id = 0, $response_message = '';
 
     	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
