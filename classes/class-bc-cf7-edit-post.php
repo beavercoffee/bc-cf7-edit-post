@@ -227,16 +227,19 @@ if(!class_exists('BC_CF7_Edit_Post')){
                 $submission->set_response($post_id->get_error_message());
             }
             $this->post_id = $post_id;
-            foreach($submission->get_posted_data() as $key => $value){
-                if(is_array($value)){
-					delete_post_meta($post_id, $key);
-					foreach($value as $single){
-						add_post_meta($post_id, $key, $single);
-					}
-				} else {
-                    update_post_meta($post_id, $key, $value);
-				}
-			}
+            $posted_data = $submission->get_posted_data();
+            if($posted_data){
+                foreach($submission->get_posted_data() as $key => $value){
+                    if(is_array($value)){
+    					delete_post_meta($post_id, $key);
+    					foreach($value as $single){
+    						add_post_meta($post_id, $key, $single);
+    					}
+    				} else {
+                        update_post_meta($post_id, $key, $value);
+    				}
+    			}
+            }
             $error = new WP_Error;
             $uploaded_files = $submission->uploaded_files();
             if($uploaded_files){

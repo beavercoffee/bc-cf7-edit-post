@@ -12,7 +12,7 @@ Plugin URI: https://github.com/beavercoffee/bc-cf7-edit-post
 Requires at least: 5.7
 Requires PHP: 5.6
 Text Domain: bc-cf7-edit-post
-Version: 1.7.9.2
+Version: 1.7.9.3
 */
 
 if(defined('ABSPATH')){
