@@ -139,7 +139,9 @@ if(!class_exists('BC_CF7_Edit_Post')){
                 $post = get_post($post_id);
             } else {
                 if('current' === $post_id){
-                    $post = get_post();
+                    if(in_the_loop()){
+                        $post = get_post();
+                    }
                 }
             }
             if(null === $post){
