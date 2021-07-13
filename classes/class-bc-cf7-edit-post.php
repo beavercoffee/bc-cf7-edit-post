@@ -200,8 +200,6 @@ if(!class_exists('BC_CF7_Edit_Post')){
             if(!has_filter('wpcf7_verify_nonce', 'is_user_logged_in')){
                 add_filter('wpcf7_verify_nonce', 'is_user_logged_in');
             }
-            add_action('wpcf7_mail_failed', [$this, 'wpcf7_mail_failed']);
-			add_action('wpcf7_mail_sent', [$this, 'wpcf7_mail_sent']);
             bc_build_update_checker('https://github.com/beavercoffee/bc-cf7-edit-post', $this->file, 'bc-cf7-edit-post');
         }
 
@@ -223,7 +221,7 @@ if(!class_exists('BC_CF7_Edit_Post')){
             if(!$submission->is('init')){
                 return; // prevent conflicts with other plugins
             }
-            $abort = true; // prevent mail
+            $abort = true; // prevent mail_sent and mail_failed actions
             $post_id = $this->get_post_id($contact_form, $submission);
             if(is_wp_error($post_id)){
                 $submission->set_response($post_id->get_error_message());
@@ -263,20 +261,23 @@ if(!class_exists('BC_CF7_Edit_Post')){
                     }
                 }
             }
-            do_action('bc_cf7_edit_post', $post_id, $contact_form, $error);
-            if('post' === get_post_type($post_id)){
-                $submission->set_response(__('Post updated.'));
-            } else {
-                $submission->set_response(__('Item updated.'));
-            }
-            $submission->set_status('mail_sent');
+            $response = 'post' === get_post_type($post_id) ? __('Post updated.') : __('Item updated.');
+            if($submission->mail()){
+                $submission->set_response($response . ' ' . $contact_form->message('mail_sent_ok'));
+                $submission->set_status('mail_sent');
+			} else {
+                $submission->set_response($response . ' ' . $contact_form->message('mail_sent_ng'));
+				$submission->set_status('mail_failed');
+			}
+            // maybe update metadata
+            do_action('bc_cf7_edit_post', $post_id, $contact_form, $submission, $error);
         }
 
     	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         public function wpcf7_feedback_response($response, $result){
-            if(isset($response['bc_uniqid']) and '' !== $response['bc_uniqid']){
-                if(0 !== $this->post_id){
+            if(0 !== $this->post_id){
+                if(isset($response['bc_uniqid']) and '' !== $response['bc_uniqid']){
                     $uniqid = get_post_meta($this->post_id, 'bc_uniqid', true);
                     if('' !== $uniqid){
                         $response['bc_uniqid'] = $uniqid;
