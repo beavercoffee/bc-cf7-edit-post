@@ -176,9 +176,9 @@ if(!class_exists('BC_CF7_Edit_Post')){
             if(!defined('WPCF7_VERSION')){
         		return;
         	}
+            add_action('wpcf7_before_send_mail', [$this, 'wpcf7_before_send_mail'], 10, 3);
             add_filter('do_shortcode_tag', [$this, 'do_shortcode_tag'], 10, 4);
             add_filter('shortcode_atts_wpcf7', [$this, 'shortcode_atts_wpcf7'], 10, 3);
-            add_action('wpcf7_before_send_mail', [$this, 'wpcf7_before_send_mail'], 10, 3);
             add_filter('wpcf7_feedback_response', [$this, 'wpcf7_feedback_response'], 15, 2);
             add_filter('wpcf7_form_hidden_fields', [$this, 'wpcf7_form_hidden_fields'], 15);
             if(!has_filter('wpcf7_verify_nonce', 'is_user_logged_in')){
@@ -213,38 +213,6 @@ if(!class_exists('BC_CF7_Edit_Post')){
                 return;
             }
             $this->post_id = $post_id;
-            $posted_data = $submission->get_posted_data();
-            if($posted_data){
-                foreach($posted_data as $key => $value){
-                    if(is_array($value)){
-    					delete_post_meta($post_id, $key);
-    					foreach($value as $single){
-    						add_post_meta($post_id, $key, $single);
-    					}
-    				} else {
-                        update_post_meta($post_id, $key, $value);
-    				}
-    			}
-            }
-            $error = new WP_Error;
-            $uploaded_files = $submission->uploaded_files();
-            if($uploaded_files){
-                foreach($uploaded_files as $key => $value){
-                    delete_post_meta($post_id, $key . '_id');
-                    delete_post_meta($post_id, $key . '_filename');
-                    foreach((array) $value as $single){
-                        $attachment_id = $this->upload_file($single, $post_id);
-                        if(is_wp_error($attachment_id)){
-                            add_post_meta($post_id, $key . '_id', 0);
-                            add_post_meta($post_id, $key . '_filename', $attachment_id->get_error_message());
-                            $error->merge_from($attachment_id);
-                        } else {
-                            add_post_meta($post_id, $key . '_id', $attachment_id);
-                            add_post_meta($post_id, $key . '_filename', wp_basename($single));
-                        }
-                    }
-                }
-            }
             $response = 'post' === get_post_type($post_id) ? __('Post updated.') : __('Item updated.');
             if(bc_cf7_skip_mail($contact_form)){
                 $submission->set_response($response);
@@ -258,8 +226,10 @@ if(!class_exists('BC_CF7_Edit_Post')){
                     $submission->set_status('mail_failed');
                 }
             }
-            // maybe update metadata
-            do_action('bc_cf7_edit_post', $post_id, $contact_form, $submission, $error);
+            bc_cf7_update_meta_data(bc_cf7_meta_data($contact_form, $submission), $post_id);
+            bc_cf7_update_posted_data($submission->get_posted_data(), $post_id);
+            bc_cf7_update_uploaded_files($submission->uploaded_files(), $post_id);
+            do_action('bc_cf7_edit_post', $post_id, $contact_form, $submission);
         }
 
     	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
