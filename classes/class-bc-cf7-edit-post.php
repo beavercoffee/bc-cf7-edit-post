@@ -37,7 +37,7 @@ if(!class_exists('BC_CF7_Edit_Post')){
     	//
     	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        private $file = '', $post_id = 0;
+        private $additional_data = [], $file = '', $post_id = 0;
 
     	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -181,6 +181,13 @@ if(!class_exists('BC_CF7_Edit_Post')){
             add_filter('shortcode_atts_wpcf7', [$this, 'shortcode_atts_wpcf7'], 10, 3);
             add_filter('wpcf7_feedback_response', [$this, 'wpcf7_feedback_response'], 15, 2);
             add_filter('wpcf7_form_hidden_fields', [$this, 'wpcf7_form_hidden_fields'], 15);
+            add_filter('wpcf7_posted_data', [$this, 'wpcf7_posted_data']);
+            add_filter('wpcf7_posted_data_checkbox', [$this, 'wpcf7_posted_data_type'], 10, 3);
+            add_filter('wpcf7_posted_data_checkbox*', [$this, 'wpcf7_posted_data_type'], 10, 3);
+            add_filter('wpcf7_posted_data_radio', [$this, 'wpcf7_posted_data_type'], 10, 3);
+            add_filter('wpcf7_posted_data_radio*', [$this, 'wpcf7_posted_data_type'], 10, 3);
+            add_filter('wpcf7_posted_data_select', [$this, 'wpcf7_posted_data_type'], 10, 3);
+            add_filter('wpcf7_posted_data_select*', [$this, 'wpcf7_posted_data_type'], 10, 3);
             if(!has_filter('wpcf7_verify_nonce', 'is_user_logged_in')){
                 add_filter('wpcf7_verify_nonce', 'is_user_logged_in');
             }
@@ -266,6 +273,52 @@ if(!class_exists('BC_CF7_Edit_Post')){
                 }
             }
             return $hidden_fields;
+        }
+
+    	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        public function wpcf7_posted_data($posted_data){
+            if($this->additional_data){
+                $posted_data = array_merge($posted_data, $this->additional_data);
+            }
+            return $posted_data;
+        }
+
+    	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        public function wpcf7_posted_data_type($value, $value_orig, $tag){
+            $name = $tag->name;
+            $pipes = $tag->pipes;
+            $type = $tag->type;
+            if(WPCF7_USE_PIPE and $pipes instanceof WPCF7_Pipes and !$pipes->zero()){
+                if(is_array($value_orig)){
+                    $value = [];
+                    $value_pipe = [];
+                    foreach($value_orig as $v){
+                        $value[] = $v;
+                        $value_pipe[] = $pipes->do_pipe($v);
+                    }
+                } else {
+                    $value = $value_orig;
+                    $value_pipe = $pipes->do_pipe($value_orig);
+                }
+        		$this->additional_data[$name . '_value'] = $value_pipe;
+            }
+        	if(wpcf7_form_tag_supports($type, 'selectable-values')){
+                $value = (array) $value;
+        		$value_orig = (array) $value_orig;
+                if($tag->has_option('free_text')){
+        			$last_val = array_pop($value);
+        			$last_val_orig = array_pop($value_orig);
+        			if($last_val === $last_val_orig){
+        				$value[] = $last_val;
+        			} else {
+        				$value[] = $last_val_orig;
+        				$this->additional_data[$name . '_free_text'] = trim(str_replace($last_val_orig, '', $last_val));
+        			}
+                }
+            }
+            return $value;
         }
 
     	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
