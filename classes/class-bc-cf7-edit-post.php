@@ -135,16 +135,6 @@ if(!class_exists('BC_CF7_Edit_Post')){
         }
 
     	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    	private function upload_file($tmp_name = '', $post_id = 0){
-            $file = bc_move_uploaded_file($tmp_name);
-            if(is_wp_error($file)){
-                return $file;
-            }
-            return bc_upload($file, $post_id);
-        }
-
-    	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     	//
     	// public
     	//
