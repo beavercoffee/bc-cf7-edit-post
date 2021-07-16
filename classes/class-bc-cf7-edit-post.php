@@ -150,6 +150,23 @@ if(!class_exists('BC_CF7_Edit_Post')){
     	//
     	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+        public function bc_cf7_free_text_value($value, $tag){
+            if('' !== $value){
+                return $value;
+            }
+            $contact_form = wpcf7_get_current_contact_form();
+            if('edit-post' !== bc_cf7_type($contact_form)){
+                return $value;
+            }
+            $post_id = $this->get_post_id($contact_form);
+            if(is_wp_error($post_id)){
+                return $value;
+            }
+            return get_post_meta($post_id, $tag->name . '_free_text', true);
+        }
+
+    	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
         public function do_shortcode_tag($output, $tag, $attr, $m){
 			if('contact-form-7' !== $tag){
                 return $output;
@@ -177,6 +194,7 @@ if(!class_exists('BC_CF7_Edit_Post')){
         		return;
         	}
             add_action('wpcf7_before_send_mail', [$this, 'wpcf7_before_send_mail'], 10, 3);
+            add_filter('bc_cf7_free_text_value', [$this, 'bc_cf7_free_text_value'], 10, 2);
             add_filter('do_shortcode_tag', [$this, 'do_shortcode_tag'], 10, 4);
             add_filter('shortcode_atts_wpcf7', [$this, 'shortcode_atts_wpcf7'], 10, 3);
             add_filter('wpcf7_feedback_response', [$this, 'wpcf7_feedback_response'], 15, 2);
