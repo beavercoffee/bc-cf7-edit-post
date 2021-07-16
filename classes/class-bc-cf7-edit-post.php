@@ -317,6 +317,7 @@ if(!class_exists('BC_CF7_Edit_Post')){
 					$tied_item = html_entity_decode($tied_item, ENT_QUOTES, 'UTF-8');
         			if($last_val === $tied_item){
         				$value[] = $last_val;
+                        $this->additional_data[$name . '_free_text'] = '';
         			} else {
         				$value[] = $tied_item;
         				$this->additional_data[$name . '_free_text'] = trim(str_replace($tied_item, '', $last_val));
