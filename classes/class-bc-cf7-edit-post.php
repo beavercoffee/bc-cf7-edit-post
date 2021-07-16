@@ -287,36 +287,27 @@ if(!class_exists('BC_CF7_Edit_Post')){
     	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         public function wpcf7_posted_data_type($value, $value_orig, $tag){
-            $name = $tag->name;
+			$name = $tag->name;
             $pipes = $tag->pipes;
             $type = $tag->type;
-            if(WPCF7_USE_PIPE and $pipes instanceof WPCF7_Pipes and !$pipes->zero()){
-                if(is_array($value_orig)){
-                    $value = [];
-                    $value_pipe = [];
-                    foreach($value_orig as $v){
-                        $value[] = $v;
-                        $value_pipe[] = $pipes->do_pipe($v);
-                    }
-                } else {
-                    $value = $value_orig;
-                    $value_pipe = $pipes->do_pipe($value_orig);
-                }
-        		$this->additional_data[$name . '_value'] = $value_pipe;
-            }
-        	if(wpcf7_form_tag_supports($type, 'selectable-values')){
+			if(wpcf7_form_tag_supports($type, 'selectable-values')){
                 $value = (array) $value;
-        		$value_orig = (array) $value_orig;
-                if($tag->has_option('free_text')){
+                $value_orig = (array) $value_orig;
+				if($tag->has_option('free_text') and isset($_POST[$name . '_free_text'])){
         			$last_val = array_pop($value);
-        			$last_val_orig = array_pop($value_orig);
-        			if($last_val === $last_val_orig){
+					list($tied_item) = array_slice(WPCF7_USE_PIPE ? $tag->pipes->collect_afters() : $tag->values, -1, 1);
+					$tied_item = html_entity_decode($tied_item, ENT_QUOTES, 'UTF-8');
+        			if($last_val === $tied_item){
         				$value[] = $last_val;
         			} else {
-        				$value[] = $last_val_orig;
-        				$this->additional_data[$name . '_free_text'] = trim(str_replace($last_val_orig, '', $last_val));
+        				$value[] = $tied_item;
+        				$this->additional_data[$name . '_free_text'] = trim(str_replace($tied_item, '', $last_val));
         			}
                 }
+            }
+			if(WPCF7_USE_PIPE and $pipes instanceof WPCF7_Pipes and !$pipes->zero()){
+				$this->additional_data[$name . '_value'] = $value;
+				$value = $value_orig;
             }
             return $value;
         }
