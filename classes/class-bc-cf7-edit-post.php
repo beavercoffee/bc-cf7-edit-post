@@ -169,17 +169,6 @@ if(!class_exists('BC_CF7_Edit_Post')){
 
     	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        public function bc_functions_loaded(){
-            bc_build_update_checker('https://github.com/beavercoffee/bc-cf7-edit-post', $this->file, 'bc-cf7-edit-post');
-            if(!bc_is_plugin_active('bc-cf7/bc-cf7.php')){
-                add_action('admin_notices', function(){
-                    echo bc_admin_notice(sprintf(__('No plugins found for: %s.'),'<strong>BC CF7</strong>'));
-                });
-        	}
-        }
-
-    	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
         public function bc_cf7_loaded(){
             add_action('wpcf7_before_send_mail', [$this, 'wpcf7_before_send_mail'], 10, 3);
             add_filter('bc_cf7_free_text_value', [$this, 'bc_cf7_free_text_value'], 10, 2);
@@ -191,6 +180,17 @@ if(!class_exists('BC_CF7_Edit_Post')){
                 add_filter('wpcf7_verify_nonce', 'is_user_logged_in');
             }
             do_action('bc_cf7_edit_post_loaded');
+        }
+
+    	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        public function bc_functions_loaded(){
+            bc_build_update_checker('https://github.com/beavercoffee/bc-cf7-edit-post', $this->file, 'bc-cf7-edit-post');
+            if(!bc_is_plugin_active('bc-cf7/bc-cf7.php')){
+                add_action('admin_notices', function(){
+                    echo bc_admin_notice(sprintf(__('No plugins found for: %s.'),'<strong>BC CF7</strong>'));
+                });
+        	}
         }
 
     	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
