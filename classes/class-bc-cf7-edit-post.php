@@ -173,7 +173,7 @@ if(!class_exists('BC_CF7_Edit_Post')){
             bc_build_update_checker('https://github.com/beavercoffee/bc-cf7-edit-post', $this->file, 'bc-cf7-edit-post');
             if(!bc_is_plugin_active('bc-cf7/bc-cf7.php')){
                 add_action('admin_notices', function(){
-                    echo bc_admin_notice(printf(__('No plugins found for: %s.'),'<strong>BC CF7</strong>'));
+                    echo bc_admin_notice(sprintf(__('No plugins found for: %s.'),'<strong>BC CF7</strong>'));
                 });
         	}
         }
